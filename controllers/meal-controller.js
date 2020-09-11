@@ -59,15 +59,6 @@ module.exports = {
         ['date', 'ASC']
       ]
     }).then(dbRes => {
-      /*
-      result object:
-      [
-        {
-
-        }
-
-      ]
-      */
       res.status(200).send(dbRes.reduce(clumpDates, {}))
     }).catch(err => {
       res.status(500).send({
