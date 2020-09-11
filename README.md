@@ -1,7 +1,7 @@
 # meal-scheduler
 
-Created by Oliver X. (Liversticks)
-Front-end code is located [here](github.com/Liversticks/meal-client)
+Created by Oliver X. (Liversticks).  
+Front-end code is located [here](https://github.com/Liversticks/meal-client)
 
 ## API Reference
 
