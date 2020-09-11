@@ -19,7 +19,8 @@ Front-end code is located [here](github.com/Liversticks/meal-client)
       accessToken: null,
       message: "ERROR_MESSAGE"
     }`
-* GET `/api/meals`: Gets meals from current date to (current date + 35 days) ordered by date ascending. Result object: ```javascript
+* GET `/api/meals`: Gets meals from current date to (current date + 35 days) ordered by date ascending. Result object:
+```javascript
 {
     mm/dd/yyyy: {
       breakfast: {},
@@ -30,10 +31,11 @@ Front-end code is located [here](github.com/Liversticks/meal-client)
       },
       snack: {}
     }
-  }
-  ```Note that the result object's keys only exist for dates where at least one meal is already scheduled.
+}
+```
+  Note that the result object's keys only exist for dates where at least one meal is already scheduled.
 
-  ## Upcoming features
+## Upcoming features
 
   * Add profile page for users
   * Add birthday to user model
