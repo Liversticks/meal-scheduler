@@ -32,6 +32,7 @@ module.exports = {
     .then(user => {
       if (!user) {
         return res.status(404).send({
+          accessToken: null,
           message: "This user does not exist."
         })
       }
