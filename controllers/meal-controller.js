@@ -78,7 +78,7 @@ module.exports = {
 
   createMeal: (req, res) => {
     Meal.create({
-      date: req.body.date,
+      date: moment(req.body.date, 'MM-DD-YYYY').toDate(),
       meal_type: req.body.meal_type,
       meal_desc: req.body.meal_desc,
       userUsername: req.username
@@ -98,7 +98,7 @@ module.exports = {
       meal_desc: req.body.meal_desc
     }, {
       where: {
-        date: req.body.date,
+        date: moment(req.body.date, 'MM-DD-YYYY').toDate(),
         meal_type: req.body.meal_type,
         userUsername: req.username
       }

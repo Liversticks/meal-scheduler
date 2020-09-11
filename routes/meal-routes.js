@@ -10,15 +10,11 @@ module.exports = (app) => {
     next()
   })
 
-  app.get('/', controller.test)
+  app.get('/api/meals', [authJWT.verifyToken], controller.getMeals)
 
-  app.get('/main', [authJWT.verifyToken], controller.loginTest)
+  app.post('/api/meals', [authJWT.verifyToken], controller.createMeal)
 
-  app.get('/meals', [authJWT.verifyToken], controller.getMeals)
+  app.delete('/api/meals', [authJWT.verifyToken], controller.deleteMeal)
 
-  app.post('/meals', [authJWT.verifyToken], controller.createMeal)
-
-  app.delete('/meals', [authJWT.verifyToken], controller.deleteMeal)
-
-  app.put('/meals', [authJWT.verifyToken], controller.updateMeal)
+  app.put('/api/meals', [authJWT.verifyToken], controller.updateMeal)
 }

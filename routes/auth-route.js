@@ -10,7 +10,7 @@ module.exports = (app) => {
     next()
   })
 
-  app.post('/signup', [verifySignUp.checkDuplicate], controller.signup)
+  app.post('/api/signup', [verifySignUp.checkDuplicate], controller.signup)
 
-  app.post('/login', controller.login)
+  app.post('/api/login', controller.login)
 }
