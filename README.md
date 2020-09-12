@@ -39,5 +39,4 @@ Front-end code is located [here](https://github.com/Liversticks/meal-client)
 
   * Add profile page for users
   * Add birthday to user model
-  * Add tooltip to view meal descriptions by other users without opening modal
   * Add support for holidays
