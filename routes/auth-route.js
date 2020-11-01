@@ -1,16 +1,18 @@
 const controller = require('../controllers/auth-controller')
 const verifySignUp = require('../middleware/verifySignUp')
+const express = require('express')
+var router = express.Router()
 
-module.exports = (app) => {
-  app.use((req, res, next) => {
-    res.header(
-      "Access-Control-Allow-Headers",
-      "x-access-token, Origin, Content-Type, Accept"
-    )
-    next()
-  })
+router.use((req, res, next) => {
+  res.header(
+    "Access-Control-Allow-Headers",
+    "x-access-token, Origin, Content-Type, Accept"
+  )
+  next()
+})
 
-  app.post('/api/signup', [verifySignUp.checkDuplicate], controller.signup)
+router.post('/signup', [verifySignUp.checkDuplicate], controller.signup)
 
-  app.post('/api/login', controller.login)
-}
+router.post('/login', controller.login)
+
+module.exports = router

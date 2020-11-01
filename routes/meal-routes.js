@@ -1,20 +1,22 @@
 const authJWT = require('../middleware/authJWT')
 const controller = require('../controllers/meal-controller')
+const express = require('express')
+var router = express.Router()
 
-module.exports = (app) => {
-  app.use((req, res, next) => {
-    res.header(
-      "Access-Control-Allow-Headers",
-      "x-access-token, Origin, Content-Type, Accept"
-    )
-    next()
-  })
+router.use((req, res, next) => {
+  res.header(
+    "Access-Control-Allow-Headers",
+    "x-access-token, Origin, Content-Type, Accept"
+  )
+  next()
+})
 
-  app.get('/api/meals', [authJWT.verifyToken], controller.getMeals)
+router.get('/', [authJWT.verifyToken], controller.getMeals)
 
-  app.post('/api/meals', [authJWT.verifyToken], controller.createMeal)
+router.post('/', [authJWT.verifyToken], controller.createMeal)
 
-  app.delete('/api/meals', [authJWT.verifyToken], controller.deleteMeal)
+router.delete('/', [authJWT.verifyToken], controller.deleteMeal)
 
-  app.put('/api/meals', [authJWT.verifyToken], controller.updateMeal)
-}
+router.put('/', [authJWT.verifyToken], controller.updateMeal)
+
+module.exports = router

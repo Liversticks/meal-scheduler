@@ -16,13 +16,20 @@ let corsOptions = {
 */
 
 app.use(cors())
-
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.static(path.join(__dirname, 'build')))
+app.use('/static', express.static(path.join(__dirname, 'public/uploads')))
 
-require('./routes/auth-route')(app)
-require('./routes/meal-routes')(app)
+const authAPI = require('./routes/auth-route')
+app.use('/api/auth', authAPI)
+
+const mealAPI = require('./routes/meal-routes')
+app.use('/api/meals', mealAPI)
+
+const userAPI = require('./routes/user-routes')
+app.use('/api/users', userAPI)
+
 
 app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, 'build', 'index.html'))
