@@ -1,5 +1,6 @@
 const db = require('../models/index.js')
 const Meal = db.Meal
+const Calendar = db.Calendar
 const oper = require('sequelize').Op
 const moment = require('moment')
 
@@ -11,55 +12,61 @@ function clumpDates(accumulator, currentValue) {
   //if yes, then store currentValue['meal_desc'] and currentValue['userUsername']
   //under accumulator[date][currentValue['meal_type']]
   //otherwise, create the meal type and file the description/chef
-  let dateKey = moment(currentValue.date).format("L")
-  if (!accumulator.hasOwnProperty(dateKey)) {
-    accumulator[dateKey] = {
-      breakfast: {},
-      lunch: {},
-      dinner: {},
-      snack: {}
-    }
-  }
+  let dateKey = moment(currentValue['meal_date']).format("L")
   accumulator[dateKey][currentValue['meal_type']]['meal_desc'] = currentValue['meal_desc']
-  accumulator[dateKey][currentValue['meal_type']]['chef'] = currentValue['userUsername']
+  accumulator[dateKey][currentValue['meal_type']]['chef'] = currentValue['chef']
+  return accumulator
+}
+
+function matchHolidays(accumulator, currentValue) {
+  let dateKey = moment(currentValue['date']).format("L")
+  accumulator[dateKey] = {
+    breakfast: {},
+    lunch: {},
+    dinner: {},
+    snack: {},
+    holiday: currentValue['holiday']
+  }
   return accumulator
 }
 
 module.exports = {
-  test: (req, res) => {
-    res.status(200).send({
-      message: "Test message."
-    })
-  },
-
-  loginTest: (req, res) => {
-    console.log(req.username)
-    res.status(200).send({
-      message: "Logged in."
-    })
-  },
 
   getMeals: (req, res) => {
     let today = moment().startOf('day')
     let fiveWeeks = today.clone().add(35, 'd')
-    Meal.findAll({
+    Calendar.findAll({
       attributes: [
         'date',
-        'meal_type',
-        'meal_desc',
-        'userUsername'
+        'holiday'
       ],
       where: {
         date: {
           [oper.gte]: today.toDate(),
           [oper.lte]: fiveWeeks.toDate()
         }
-      },
-      order: [
-        ['date', 'ASC']
-      ]
-    }).then(dbRes => {
-      res.status(200).send(dbRes.reduce(clumpDates, {}))
+      }
+    }).then(dateRes => {
+      Meal.findAll({
+        attributes: [
+          'meal_date',
+          'meal_type',
+          'meal_desc',
+          'chef'
+        ],
+        where: {
+          meal_date: {
+            [oper.gte]: today.toDate(),
+            [oper.lte]: fiveWeeks.toDate()
+          }
+        },
+        order: [
+          ['meal_date', 'ASC']
+        ]
+      }).then(mealRes => {
+        let retObj = mealRes.reduce(clumpDates, dateRes.reduce(matchHolidays, {}))
+        res.status(200).send(retObj)
+      })
     }).catch(err => {
       res.status(500).send({
         message: err.message
@@ -69,10 +76,10 @@ module.exports = {
 
   createMeal: (req, res) => {
     Meal.create({
-      date: moment(req.body.date, 'MM-DD-YYYY').toDate(),
+      meal_date: moment(req.body.date, 'MM-DD-YYYY').toDate(),
       meal_type: req.body.meal_type,
       meal_desc: req.body.meal_desc,
-      userUsername: req.username
+      chef: req.username
     }).then(() => {
       res.status(201).send({
         message: 'Meal scheduled successfully!'
@@ -89,9 +96,9 @@ module.exports = {
       meal_desc: req.body.meal_desc
     }, {
       where: {
-        date: moment(req.body.date, 'MM-DD-YYYY').toDate(),
+        meal_date: moment(req.body.date, 'MM-DD-YYYY').toDate(),
         meal_type: req.body.meal_type,
-        userUsername: req.username
+        chef: req.username
       }
     }).then(() => {
       res.status(200).send({
@@ -107,7 +114,7 @@ module.exports = {
   deleteMeal: (req, res) => {
     Meal.destroy({
       where: {
-        date: moment(req.body.date, 'MM-DD-YYYY').toDate(),
+        meal_date: moment(req.body.date, 'MM-DD-YYYY').toDate(),
         meal_type: req.body.meal_type
       }
     }).then(() => {

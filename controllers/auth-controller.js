@@ -3,6 +3,7 @@ const auth = require('../config/auth')
 const User = db.User
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const moment = require('moment')
 
 module.exports = {
 
@@ -10,7 +11,8 @@ module.exports = {
     User.create({
       username: req.body.username,
       email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, 10)
+      password: bcrypt.hashSync(req.body.password, 10),
+      birthday: moment(req.body.birthday, "YYYY-MM-DD").toDate()
     }).then(() => {
       res.status(200).send({
         message: "Signed up successfully!"
@@ -33,7 +35,7 @@ module.exports = {
       if (!user) {
         return res.status(404).send({
           accessToken: null,
-          message: "This user does not exist."
+          message: "Authentication error - invalid username or password."
         })
       }
 
@@ -41,13 +43,12 @@ module.exports = {
       if (!validPass) {
         return res.status(401).send({
           accessToken: null,
-          message: "Invalid password."
+          message: "Authentication error - invalid username or password."
         })
       }
 
       let token = jwt.sign({
-        username: user.username,
-        email: user.email
+        username: user.username
       }, auth.secret, {
         expiresIn: 43200
       })
