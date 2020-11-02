@@ -26,41 +26,51 @@ module.exports = {
   },
 
   login: (req, res) => {
-    User.findOne({
-      where: {
-        username: req.body.username
-      }
-    })
-    .then(user => {
-      if (!user) {
-        return res.status(404).send({
-          accessToken: null,
-          message: "Authentication error - invalid username or password."
+    if (req.body.hasOwnProperty('username')) {
+      if (req.body.hasOwnProperty('password')) {
+        User.findOne({
+          where: {
+            username: req.body.username
+          }
+        })
+        .then(user => {
+          if (!user) {
+            return res.status(401).send({
+              accessToken: null,
+              message: "Authentication error - invalid username or password."
+            })
+          }
+          let validPass = bcrypt.compareSync(req.body.password, user.password)
+          if (!validPass) {
+            return res.status(401).send({
+              accessToken: null,
+              message: "Authentication error - invalid username or password."
+            })
+          }
+          let token = jwt.sign({
+            username: user.username
+          }, auth.secret, {
+            expiresIn: 43200
+          })
+          res.status(200).send({
+            accessToken: token
+          })
+        })
+        .catch(err => {
+          res.status(500).send({
+            message: err.message
+          })
+        })
+      } else {
+        return res.status(400).send({
+          message: 'Password not provided.'
         })
       }
-
-      let validPass = bcrypt.compareSync(req.body.password, user.password)
-      if (!validPass) {
-        return res.status(401).send({
-          accessToken: null,
-          message: "Authentication error - invalid username or password."
-        })
-      }
-
-      let token = jwt.sign({
-        username: user.username
-      }, auth.secret, {
-        expiresIn: 43200
+    } else {
+      return res.status(400).send({
+        message: 'Username not provided.'
       })
+    }
 
-      res.status(200).send({
-        accessToken: token
-      })
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: err.message
-      })
-    })
   }
 }

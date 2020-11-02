@@ -4,7 +4,8 @@
 const Sequelize = require('sequelize')
 const sequelize = new Sequelize(process.env.DATABASE_URL || process.env.LOCALDATABASE, {
   dialect: 'postgres',
-  protocol: 'tcp'
+  protocol: 'tcp',
+  logging: (process.env.NODE_ENV === 'test' ? () => {} : console.log())
 })
 
 module.exports = { sequelize }
