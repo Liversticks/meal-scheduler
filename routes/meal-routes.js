@@ -1,5 +1,6 @@
 const authJWT = require('../middleware/authJWT')
 const controller = require('../controllers/meal-controller')
+const mealValidation = require('../middleware/mealValidation')
 const express = require('express')
 var router = express.Router()
 
@@ -13,10 +14,10 @@ router.use((req, res, next) => {
 
 router.get('/', [authJWT.verifyToken], controller.getMeals)
 
-router.post('/', [authJWT.verifyToken], controller.createMeal)
+router.post('/', [authJWT.verifyToken, mealValidation.mealUpdate], controller.createMeal)
 
-router.delete('/', [authJWT.verifyToken], controller.deleteMeal)
+router.delete('/', [authJWT.verifyToken, mealValidation.mealDelete], controller.deleteMeal)
 
-router.put('/', [authJWT.verifyToken], controller.updateMeal)
+router.put('/', [authJWT.verifyToken, mealValidation.mealUpdate], controller.updateMeal)
 
 module.exports = router
