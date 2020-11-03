@@ -52,12 +52,12 @@ module.exports = {
           }, auth.secret, {
             expiresIn: 43200
           })
-          res.status(200).send({
+          return res.status(200).send({
             accessToken: token
           })
         })
         .catch(err => {
-          res.status(500).send({
+          return res.status(500).send({
             message: err.message
           })
         })

@@ -76,7 +76,7 @@ module.exports = {
 
   createMeal: (req, res) => {
     Meal.create({
-      meal_date: moment(req.body.date, 'MM-DD-YYYY').toDate(),
+      meal_date: moment(req.body.meal_date, 'MM/DD/YYYY').toDate(),
       meal_type: req.body.meal_type,
       meal_desc: req.body.meal_desc,
       chef: req.username
@@ -96,7 +96,7 @@ module.exports = {
       meal_desc: req.body.meal_desc
     }, {
       where: {
-        meal_date: moment(req.body.date, 'MM-DD-YYYY').toDate(),
+        meal_date: moment(req.body.meal_date, 'MM/DD/YYYY').toDate(),
         meal_type: req.body.meal_type,
         chef: req.username
       }
@@ -114,7 +114,7 @@ module.exports = {
   deleteMeal: (req, res) => {
     Meal.destroy({
       where: {
-        meal_date: moment(req.body.date, 'MM-DD-YYYY').toDate(),
+        meal_date: moment(req.body.meal_date, 'MM/DD/YYYY').toDate(),
         meal_type: req.body.meal_type
       }
     }).then(() => {
