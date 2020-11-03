@@ -1,5 +1,21 @@
 process.env.NODE_ENV = 'test'
 
+let jwt = require('jsonwebtoken')
+let auth = require('../config/auth')
+let moment = require('moment')
+
+let token = jwt.sign({
+  username: process.env.LOCAL_USERNAME
+}, auth.secret, {
+  expiresIn: 43200
+})
+
+let fakeToken = jwt.sign({
+  username: 'process.env.LOCAL_USERNAME'
+}, 'bruh', {
+  expiresIn: 69420
+})
+
 let chai = require('chai')
 let chaiHTTP = require('chai-http')
 let server = require('../index.js')
@@ -217,10 +233,90 @@ describe('meal scheduler server', () => {
     })
   })
   describe('GET /api/meals', () => {
-
+    it('should return a list of meals when a valid login token is provided', (done) => {
+      let today = moment().format('MM/DD/YYYY')
+      let targetDate = moment().add(35, 'd').format('MM/DD/YYYY')
+      let middleDateNum = Math.floor(Math.random() * 33) + 1
+      let midTargetDate = moment().add(middleDateNum, 'd').format('MM/DD/YYYY')
+      chai.request(server)
+        .get('/api/meals')
+        .set('x-access-token', token)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.should.be.json
+          res.body.should.be.a('object')
+          expect(res.body).to.have.property(today)
+          expect(res.body).to.have.property(targetDate)
+          res.body[midTargetDate].breakfast.should.be.a('object')
+          res.body[midTargetDate].lunch.should.be.a('object')
+          res.body[midTargetDate].dinner.should.be.a('object')
+          res.body[midTargetDate].snack.should.be.a('object')
+          res.body[midTargetDate].holiday.should.be.a('string')
+          done()
+        })
+    })
+    it('should return an error message if no login token is provided', (done) => {
+      chai.request(server)
+        .get('/api/meals')
+        .end((err, res) => {
+          res.should.have.status(401)
+          res.should.be.json
+          res.body.should.be.a('object')
+          res.body.message.should.equal('Token not provided.')
+          done()
+        })
+    })
+    it('should return an error message if the login token is invalid', (done) => {
+      chai.request(server)
+        .get('/api/meals')
+        .set('x-access-token', fakeToken)
+        .end((err, res) => {
+          res.should.have.status(401)
+          res.should.be.json
+          res.body.should.be.a('object')
+          res.body.message.should.equal('Not authorized.')
+          done()
+        })
+    })
   })
   describe('POST /api/meals', () => {
-
+    it('should successfully schedule a meal with valid date, meal type, and description', (done) => {
+      let token1 = jwt.sign({
+        username: process.env.LOCAL_USERNAME
+      }, auth.secret, {
+        expiresIn: 43200
+      })
+      let newMeal1 = {
+        meal_date: moment().add(1, 'd').format('MM/DD/YYYY'),
+        meal_desc: 'meal description'
+      }
+      switch(Math.floor(Math.random() * 4 )) {
+        case 0:
+          newMeal1['meal_type'] = 'breakfast'
+          break
+        case 1:
+          newMeal1['meal_type'] = 'lunch'
+          break
+        case 2:
+          newMeal1['meal_type'] = 'dinner'
+          break
+        case 3:
+          newMeal1['meal_type'] = 'snack'
+          break
+      }
+      chai.request(server)
+        .post('/api/meals')
+        .set('x-access-token', token1)
+        .set('content-type', 'application/x-www-form-urlencoded')
+        .send(newMeal1)
+        .end((err, res) => {
+          res.should.have.status(201)
+          res.should.be.json
+          res.body.should.be.a('object')
+          res.body.message.should.equal('Meal scheduled successfully!')
+          done()
+        })
+    })
   })
   describe('PUT /api/meals', () => {
 
