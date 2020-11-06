@@ -77,7 +77,7 @@ module.exports = {
   createMeal: (req, res) => {
     Meal.create({
       meal_date: moment(req.body.meal_date, 'MM/DD/YYYY').toDate(),
-      meal_type: req.body.meal_type,
+      meal_type: req.body.meal_type.toLowerCase(),
       meal_desc: req.body.meal_desc,
       chef: req.username
     }).then(() => {
@@ -100,12 +100,17 @@ module.exports = {
         meal_type: req.body.meal_type,
         chef: req.username
       }
-    }).then(() => {
-      res.status(200).send({
-        message: 'Meal details updated successfully!'
+    }).then((dbRes) => {
+      if (dbRes.length > 0 && dbRes[0] > 0) {
+        return res.status(200).send({
+          message: 'Meal details updated successfully!'
+        })
+      }
+      return res.status(404).send({
+        message: `Could not update as no ${req.body.meal_type} currently exists for ${req.body.meal_date}.`
       })
     }).catch(err => {
-      res.status(500).send({
+      return res.status(500).send({
         message: err.message
       })
     })
@@ -117,10 +122,16 @@ module.exports = {
         meal_date: moment(req.body.meal_date, 'MM/DD/YYYY').toDate(),
         meal_type: req.body.meal_type
       }
-    }).then(() => {
-      res.status(200).send({
-        message: 'Meal successfully deleted.'
+    }).then((dbRes) => {
+      if (dbRes === 1) {
+        return res.status(200).send({
+          message: 'Meal successfully deleted.'
+        })
+      }
+      return res.status(404).send({
+        message: 'This meal does not exist so was not deleted.'
       })
+
     }).catch(err => {
       res.status(500).send({
         message: err.message
