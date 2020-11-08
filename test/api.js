@@ -3,6 +3,9 @@ process.env.NODE_ENV = 'test'
 let jwt = require('jsonwebtoken')
 let auth = require('../config/auth')
 let moment = require('moment')
+let fs = require('fs')
+const TESTFILEUPLOAD = './public/uploads/default/test1.png'
+const TESTFILEUPLOADUNSUPPORTED = './public/uploads/default/test1.tiff'
 
 let token = jwt.sign({
   username: process.env.LOCAL_USERNAME
@@ -612,12 +615,134 @@ describe('meal scheduler server', () => {
 
   })
   describe('GET /api/users', () => {
-
+    it('should return the profile details for an existing user', (done) => {
+      var userToken = jwt.sign({
+        username: process.env.LOCAL_USERNAME
+      }, auth.secret, {
+        expiresIn: 43200
+      })
+      chai.request(server)
+        .get('/api/users')
+        .set('x-access-token', userToken)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.should.be.json
+          res.body.should.be.a('object')
+          res.body.username.should.equal(process.env.LOCAL_USERNAME)
+          res.body.email.should.equal(process.env.LOCAL_EMAIL)
+          res.body.birthday.should.equal(process.env.LOCAL_BIRTHDAY)
+          res.body.found.should.be.false
+          done()
+        })
+    })
+    it('should return an error message if the specified user does not exist', (done) => {
+      var userToken = jwt.sign({
+        username: 'process.env.LOCAL_USERNAME'
+      }, auth.secret, {
+        expiresIn: 43200
+      })
+      chai.request(server)
+        .get('/api/users')
+        .set('x-access-token', userToken)
+        .end((err, res) => {
+          res.should.have.status(404)
+          res.should.be.json
+          res.body.should.be.a('object')
+          res.body.message.should.equal('This user does not exist.')
+          res.body.found.should.be.false
+          done()
+        })
+    })
   })
   describe('POST /api/users', () => {
-
+    var userToken = jwt.sign({
+      username: process.env.LOCAL_USERNAME
+    }, auth.secret, {
+      expiresIn: 43200
+    })
+    it('should upload an image if it is a supported file format', (done) => {
+      chai.request(server)
+        .post('/api/users')
+        .set('x-access-token', userToken)
+        .attach('file', fs.readFileSync(TESTFILEUPLOAD), 'test1.png' )
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.should.be.json
+          res.body.should.be.a('object')
+          res.body.message.should.equal('Image successfully uploaded!')
+          done()
+        })
+    })
+    it('should fail to upload an image if it is not a supported file format', (done) => {
+      chai.request(server)
+        .post('/api/users')
+        .set('x-access-token', userToken)
+        .attach('file', fs.readFileSync(TESTFILEUPLOADUNSUPPORTED), 'test1.tiff' )
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.should.be.json
+          res.body.should.be.a('object')
+          res.body.message.should.equal('Only image files (jpg/jpeg, png, gif) are allowed for upload.')
+          done()
+        })
+    })
+    it('should return an error if no file is attached', (done) => {
+      chai.request(server)
+        .post('/api/users')
+        .set('x-access-token', userToken)
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.should.be.json
+          res.body.should.be.a('object')
+          res.body.message.should.equal('No file was uploaded.')
+          done()
+        })
+    })
+    after((done) => {
+      fs.unlink(`./public/uploads/live/${process.env.LOCAL_USERNAME}.png`, (err) => {
+        done()
+      })
+    })
   })
   describe('DELETE /api/users', () => {
+    var delUserToken = jwt.sign({
+      username: process.env.LOCAL_USERNAME
+    }, auth.secret, {
+      expiresIn: 43200
+    })
+    before((done) => {
+      chai.request(server)
+        .post('/api/users')
+        .set('x-access-token', delUserToken)
+        .attach('file', fs.readFileSync(TESTFILEUPLOAD), 'test1.png' )
+        .end((err, res) => {
+          done()
+        })
+    })
+    it('when the avatar exists, it should be deleted', (done) => {
+      chai.request(server)
+        .delete('/api/users')
+        .set('x-access-token', delUserToken)
+        .end((err, res) => {
+          res.should.have.status(200)
+          res.should.be.json
+          res.body.should.be.a('object')
+          res.body.message.should.equal('Successfully deleted previous profile picture.')
+          done()
+        })
+    })
+    it('when the avatar does not exist, it should not be deleted', (done) => {
+      chai.request(server)
+        .delete('/api/users')
+        .set('x-access-token', delUserToken)
+        .end((err, res) => {
+          res.should.have.status(404)
+          res.should.be.json
+          res.body.should.be.a('object')
+          res.body.message.should.equal('Profile picture does not exist, could not be deleted.')
+          done()
+        })
+    })
 
   })
 })
