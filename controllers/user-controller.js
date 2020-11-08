@@ -40,7 +40,7 @@ module.exports = {
         })
       }
       }).catch(err => {
-      res.status(200).send({
+      res.status(404).send({
         message: "This user does not exist.",
         found: false
       })
