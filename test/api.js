@@ -489,6 +489,43 @@ describe('meal scheduler server', () => {
           done()
         })
     })
+    it('should fail to schedule a meal too far into the future', (done) => {
+      let token7 = jwt.sign({
+        username: process.env.LOCAL_USERNAME
+      }, auth.secret, {
+        expiresIn: 43200
+      })
+      let newMeal7 = {
+        meal_date: moment().add(76, 'd').format('MM/DD/YYYY'),
+        meal_desc: 'test_description'
+      }
+      switch(Math.floor(Math.random() * 4 )) {
+        case 0:
+          newMeal7['meal_type'] = 'breakfast'
+          break
+        case 1:
+          newMeal7['meal_type'] = 'lunch'
+          break
+        case 2:
+          newMeal7['meal_type'] = 'dinner'
+          break
+        case 3:
+          newMeal7['meal_type'] = 'snack'
+          break
+      }
+      chai.request(server)
+        .post('/api/meals')
+        .set('x-access-token', token7)
+        .set('content-type', 'application/x-www-form-urlencoded')
+        .send(newMeal7)
+        .end((err, res) => {
+          res.should.have.status(400)
+          res.should.be.json
+          res.body.should.be.a('object')
+          res.body.message.should.equal('Specified date is too far into the future (>75 days from now).')
+          done()
+        })
+    })
   })
   describe('PUT /api/meals', () => {
     var putToken = jwt.sign({
