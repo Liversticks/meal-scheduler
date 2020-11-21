@@ -15,6 +15,10 @@ Create an API that supports CRUD operations and gain more familiarity with Node.
 * Sequelize + PostgreSQL
 * [Front-end client](https://github.com/Liversticks/meal-client) sold separately
 
+## Features
+
+## Installation
+
 ## API Reference
 
 ### POST `/api/signup`

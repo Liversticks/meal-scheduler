@@ -1,5 +1,5 @@
+# Local environment variables
 .env
 
+# No explanation needed
 /node_modules
-
-/public/uploads
