@@ -1,8 +1,10 @@
 # meal-scheduler
 
 Meal scheduling server. Allows you to claim a meal spot and announce your recipe ahead of time.
+
 Created by Oliver X. (Liversticks).  
-Latest revision: November 20, 2020
+
+Latest revision: November 21, 2020
 
 ## Goals
 
@@ -20,7 +22,7 @@ Create an API that supports CRUD operations and gain more familiarity with Node.
 This assumes you are using PostgreSQL as the database engine.
 
 * If not using Postgres, edit `./config/db.js` and configure your preferred DB
-* Set environment variables: LOCALDATABASE/DATABASE_URL both use a connection string
+* Set environment variables: LOCALDATABASE or DATABASE_URL (connection string)
 * `npm install` to fetch external dependencies
 * `npm start` to start server
 
@@ -29,12 +31,15 @@ This assumes you are using PostgreSQL as the database engine.
 ### POST `/api/signup`
 
 Create a new user.
+
 Request fields:
 * `username`
 * `email` 
 * `password`
 * `birthday` (format YYYY-MM-DD)
+
 Response object will contain a `message` field.
+
 Example request:
 ```
 {
@@ -54,10 +59,13 @@ Response:
 ### POST `/api/login`
 
 Log in. 
+
 Request fields:
 * `username` (must already exist)
 * `password`
+
 On success, returns a JWT token that is used for requests to authentication-required routes.
+
 Example request:
 ```
 {
@@ -82,6 +90,7 @@ Response if unsuccessful:
 ### GET `/api/meals`
 
 Fetches database rows, scheduled meals, holiday (if applicable) from current date to (current date + 35 days) ordered by date ascending. `x-access-token` header necessary for access.
+
 Example request:
 ```
 x-access-token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNjA0NjMzNDg4LCJleHAiOjE2MDQ2NzY2ODh9.sEPGYjZHJV3Dp-3oXmCNGZXh31xIlxP3K1ITmjOO13E'
@@ -124,11 +133,14 @@ Response:
 ### POST `/api/meals`
 
 Creates a new meal. `x-access-token` header necessary for access as the username is encoded in the JWT.
+
 Request fields: 
 * `meal_date` (MM/DD/YYYY between the current date and 75 days from now)
 * `meal_type` (breakfast, lunch, dinner, or snack)
 * `meal_desc` (description)
+
 Response object always contains a `message` field.
+
 Example request:
 ```
 x-access-token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNjA0NjMzNDg4LCJleHAiOjE2MDQ2NzY2ODh9.sEPGYjZHJV3Dp-3oXmCNGZXh31xIlxP3K1ITmjOO13E'
@@ -148,11 +160,14 @@ Response:
 ### PUT `/api/meals`
 
 Updates an existing meal. `x-access-token` header necessary for access as the username is encoded in the JWT. 
+
 Request fields:
 * `meal_date` (MM/DD/YYYY between the current date and 75 days from now)
 * `meal_type` (breakfast, lunch, dinner, or snack)
 * `meal_desc` (description)
+
 If no meal entry exists in the database with the exact same chef, `meal_date`, and `meal_type`, the update fails. Response object always contains a `message` field.
+
 Example request:
 ```
 x-access-token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNjA0NjMzNDg4LCJleHAiOjE2MDQ2NzY2ODh9.sEPGYjZHJV3Dp-3oXmCNGZXh31xIlxP3K1ITmjOO13E'
@@ -172,10 +187,13 @@ Response:
 ### DELETE `/api/meals`
 
 Deletes (cancels) an existing meal. `x-access-token` header necessary for access as the username is encoded in the JWT. 
+
 Request fields: 
 * `meal_date` (MM/DD/YYYY between the current date and 75 days from now)
 * `meal_type` (breakfast, lunch, dinner, or snack)
+
 If no meal entry exists in the database with the exact same chef, `meal_date`, and `meal_type`, the delete fails. Response object always contains a `message` field.
+
 Example request:
 ```
 x-access-token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNjA0NjMzNDg4LCJleHAiOjE2MDQ2NzY2ODh9.sEPGYjZHJV3Dp-3oXmCNGZXh31xIlxP3K1ITmjOO13E'
@@ -194,11 +212,13 @@ Response:
 ### GET `/api/users`
 
 Returns more information about the current user. `x-access-token` header necessary for access as the username is encoded in the JWT. 
+
 Response fields:
 * `username`: The requester's username
 * `email`: The requeseter's email
 * `birthday`: The requester's birthday (YYYY-MM-DD)
 * `found`: True if the requester has their own profile picture, false otherwise
+
 Example request:
 ```
 x-access-token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNjA0NjMzNDg4LCJleHAiOjE2MDQ2NzY2ODh9.sEPGYjZHJV3Dp-3oXmCNGZXh31xIlxP3K1ITmjOO13E'
@@ -216,6 +236,7 @@ Response:
 ### POST `/api/users`
 
 Uploads a new user profile picture. `x-access-token` header necessary for access as the username is encoded in the JWT.
+
 Request fields:
 * `file`: A `.jpeg`, `.jpg`, `.png`, or `.gif` image
 Response object always contains the `message` field. 
@@ -240,6 +261,7 @@ Response:
 
 Deletes an existing user profile picture. `x-access-token` header necessary for access as the username is encoded in the JWT. The request fails if the user does not have an existing picture.
 Response object always contains the `message` field.
+
 Example request:
 ```
 x-access-token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNjA0NjMzNDg4LCJleHAiOjE2MDQ2NzY2ODh9.sEPGYjZHJV3Dp-3oXmCNGZXh31xIlxP3K1ITmjOO13E'
@@ -258,6 +280,7 @@ Before running tests, set the following environment variables:
 * LOCAL_PASSWORD
 * LOCAL_EMAIL
 * LOCAL_BIRTHDAY
+
 From the main directory, run `npm test`. Unit tests are written with Mocha and Chai.
 
 ## Upcoming features
