@@ -116,7 +116,7 @@ while (timeCounter.isSameOrBefore(timeEnd, 'day')) {
 //const ONE_DAY = 1000
 const ONE_DAY = 24 * 3600 * 1000
 
-sequelize.sync({ force: true }).then(() => {
+sequelize.sync({ force: ENVIRON }).then(() => {
   Calendar.bulkCreate(insertDates).then(() => {
     console.log("Database ready");
     setInterval(() => {
