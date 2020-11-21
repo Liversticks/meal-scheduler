@@ -1,0 +1,1 @@
+Production profile pictures are stored in this directory in the form USERNAME.png
