@@ -122,7 +122,7 @@ sequelize.sync({ force: ENVIRON }).then(() => {
     setInterval(() => {
       let insertObj = {
         date: timeCounter.toDate(),
-        holiday: 'test'
+        holiday: holidayCheck.isHoliday(timeCounter)
       }
       timeCounter = timeCounter.clone().add(1, 'd')
       Calendar.create(insertObj)
